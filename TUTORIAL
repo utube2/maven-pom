@@ -1,0 +1,12 @@
+[webapp]
+## WAR - to generate pom.xml for tomcat deployment
+
+mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-webapp -DinteractiveMode=false
+
+
+
+[NORMAL project for maven goals]
+
+## To generate JAR 
+mvn archetype:generate -DgroupId=com.victor -DartifactId=first_proj -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+
