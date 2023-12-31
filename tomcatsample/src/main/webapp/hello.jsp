@@ -12,7 +12,7 @@
 <img src="images/tomcat.gif">
 </td>
 <td>
-<h1 style="color:yellow;">!!VICTOR FORCE!!  Application JSP Page</h1>
+<h1 style="color:yellow;"><u>!!VICTOR FORCE!!  Application JSP Page!! plzz check n verify</h1>
 
 <p style="color:green;">This is the output of a JSP page that is part of the VICTOR FORCE  World application. </p>
 </td>
