@@ -12,4 +12,15 @@ If you just want to browse the contents, you can unpack the war file with the ja
 
 link for application: wget https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war
 
+-----------------------------------------------------------------------------------------------
+
+https://stackoverflow.com/questions/474725/generating-a-maven-pom-from-an-existing-project
+
+mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=sample -DarchetypeArtifactId=maven-archetype-webapp -DinteractiveMode=false
+
+mv src/* src/main/java
+mv test/* src/test/java
+mvn package
+
+-------------------------------------------------------------------------------------------
  
