@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+    environment {
+         dockerImage = ''
+         registry = 'utube/pythonapp'
+         registryCredential = 'jenkins-docker'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://bitbucket.org/ananthkannan/mypythonrepo']])
+            }
+        }
+
+        stage('Build DockerImage'){
+            steps {
+               script{
+                    dockerImage = docker.build registry
+               }
+  
+            }
+
+        }
+
+       stage('Push image to DockerHub') {
+          steps {
+             script{
+                    docker.withRegistry( '', registryCredential ) {
+                    dockerImage.push()
+                   }
+             }
+           
+  
+          }
+        
+
+       }
+
+    }
+}
