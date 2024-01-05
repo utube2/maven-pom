@@ -1,60 +1,72 @@
-DOCKER HUB JENKINS
-
-
+DOCKER HUB JENKINS  -  jenkins to dockerhub to running container 
+https://www.coachdevops.com/2020/05/automate-docker-builds-using-jenkins.html
+https://www.youtube.com/watch?v=UTziA84ynvo
+** https://medium.com/@gustavo.guss/jenkins-building-docker-image-and-sending-to-registry-64b84ea45ee9
+=========================================
 pipeline {
     agent any 
     environment {
-        //once you sign up for Docker hub, use that user_id here
-        registry = "your_docker_user_id/mypythonapp"
-        //- update your credentials ID after creating credentials for connecting to Docker Hub
-        registryCredential = 'fa32f95a-2d3e-4c7b-8f34-11bcc0191d70'
-        dockerImage = ''
+        registry = 'utube/pythonapp'  //"your_docker_user_id/mypythonapp"
+        registryCredential = 'docker-hub' // credential id - add docker username , password n copy the id
+        dockerImage = ''  // variable to hold docker build image information
+        
     }
-    
     stages {
-        stage('Cloning Git') {
+        stage ('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://bitbucket.org/ananthkannan/mypythonrepo']]])       
+                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/utube2/jenkins-dockerhub.git']])
             }
         }
-    
-    // Building Docker images
-    stage('Building image') {
-      steps{
-        script {
-          dockerImage = docker.build registry
-        }
-      }
-    }
-    
-     // Uploading Docker images into Docker Hub
-    stage('Upload Image') {
-     steps{    
-         script {
-            docker.withRegistry( '', registryCredential ) {
-            dockerImage.push()
+        // docker build -t <tag> .
+        stage ('Build Docker image' ) {
+            steps {
+                script {   // refer for variables - /pipeline-syntax/globals
+                    
+                      dockerImage = docker.build registry + ":${BUILD_ID}"   // here registry's value is used as a tag ; docker build -t ${registry} .
+                                     //docker.build registry + ":$BUILD_NUMBER"  https://medium.com/@gustavo.guss/jenkins-building-docker-image-and-sending-to-registry-64b84ea45ee9
+                                    // and we are storing image or build info in variable dockerHub , later we use this to push image  
+                                    // build(image[, args])
+                                   // Runs docker build to create and tag the specified image from a Dockerfile in the current directory. Additional args may be added, such as '-f Dockerfile.other --pull --build-arg
+                                   
+                     sh "echo ${BUILD_ID}"
+                     sh "echo ${BUILD_NUMBER}"
+                      
+                }
             }
+            
         }
-      }
-    }
-    
-     // Stopping Docker containers for cleaner Docker run
-     stage('docker stop container') {
-         steps {
-            sh 'docker ps -f name=mypythonappContainer -q | xargs --no-run-if-empty docker container stop'
-            sh 'docker container ls -a -fname=mypythonappContainer -q | xargs -r docker container rm'
-         }
-       }
+        
+        stage ('Upload to Dockerhub') {
+            steps {
+                script {
+                     // withRegistry(url[, credentialsId]) {…}
+                     // Specifies a registry URL such as https://docker.mycorp.com/, plus an optional credentials ID to connect to it.
+                         docker.withRegistry( '', registryCredential ) {
+                           dockerImage.push()
+                     }
+                    
+                }
+            }
+            
+        }
+        // Stopping Docker containers for cleaner Docker run
+        stage('docker stop container') {
+             steps {
+               sh 'docker ps -f name=mypythonappContainer -q | xargs --no-run-if-empty docker container stop'
+               sh 'docker container ls -a -fname=mypythonappContainer -q | xargs -r docker container rm'
+             }
+        }
     
     
     // Running Docker container, make sure port 8096 is opened in 
-    stage('Docker Run') {
-     steps{
-         script {
-            dockerImage.run("-p 8096:5000 --rm --name mypythonappContainer")
-         }
-      }
+       stage('Docker Run') {
+            steps{
+               script {
+                  dockerImage.run("-p 8096:5000 --rm --name mypythonappContainer")
+               }
+           }
+    
+        }
     }
-  }
-}
 
+}
